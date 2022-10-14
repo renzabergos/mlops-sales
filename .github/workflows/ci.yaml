@@ -1,0 +1,29 @@
+name: ci
+on:
+  push:
+    branches:
+      - features/**
+      - hotfix/**
+      - develop
+      - staging
+      - main
+
+jobs:
+  check-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+
+      - name: Setup Pre-commit Hooks
+        run: |
+          pip install pre-commit
+          pre-commit install
+
+      - name: Check Files
+        run: |
+          pre-commit run --all-files
