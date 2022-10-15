@@ -49,3 +49,16 @@ jobs:
         run: |
           cd src/deployments
           python unit-test.py
+
+  trigger-build-deploy:
+    needs: [unit-test]
+    if: |
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke build-deploy workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build-deploy
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          inputs: '{ "env": "staging",  "run_test_after": "false", "test_kind": "integration"}'
