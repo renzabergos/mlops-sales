@@ -39,7 +39,7 @@ jobs:
       - name: Delete deployment via terraform
         run: |
           terraform init
-          bentoctl destroy -f deployment_config.yaml
+          terraform destroy -var-file=bentoctl.tfvars -auto-approve
 
       - name: Apply formatting suggestions
         continue-on-error: true
