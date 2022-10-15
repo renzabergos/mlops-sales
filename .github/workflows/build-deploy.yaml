@@ -41,7 +41,6 @@ jobs:
 
       - name: Install bentoctl AWS Sagemaker operator
         run: |
-          pip install bentoctl
           bentoctl operator install aws-sagemaker
 
       - name: Configure AWS Credentials
