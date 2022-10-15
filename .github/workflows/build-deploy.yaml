@@ -72,6 +72,11 @@ jobs:
           terraform init
           terraform apply -var-file=bentoctl.tfvars -auto-approve
 
+      - name: Apply formatting suggestions
+        continue-on-error: true
+        run: |
+          pre-commit run --all-files
+
       - name: Commit and push terraform state
         run: |
           if [ -z $(git status -s) ]; then
