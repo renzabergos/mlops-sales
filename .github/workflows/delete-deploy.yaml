@@ -21,10 +21,12 @@ jobs:
       - name: Setup terraform
         uses: hashicorp/setup-terraform@v2
 
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
       - name: Install bentoctl AWS Sagemaker operator
         run: |
-          pip install bentoml
-          pip install bentoctl==0.3.4
           bentoctl operator install aws-sagemaker
 
       - name: Configure AWS Credentials
