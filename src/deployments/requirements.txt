@@ -1,7 +1,6 @@
 docker
-awscli
 bentoml
-bentoctl
+bentoctl==0.3.4
 numpy
 pandas
 scikit-learn
