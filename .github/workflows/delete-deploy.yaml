@@ -1,0 +1,63 @@
+name: delete-deploy
+on: workflow_dispatch
+
+defaults:
+  run:
+    working-directory: src/deployments
+
+jobs:
+  delete-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Install bentoctl AWS Sagemaker operator
+        run: |
+          pip install bentoml
+          pip install bentoctl==0.3.4
+          bentoctl operator install aws-sagemaker
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Delete deployment via terraform
+        run: |
+          terraform init
+          bentoctl destroy -f deployment_config.yaml
+
+      - name: Apply formatting suggestions
+        continue-on-error: true
+        run: |
+          pip install pre-commit
+          pre-commit install
+          pre-commit run --all-files
+
+      - name: Commit and push terraform state
+        run: |
+          if [ -z $(git status -s) ]; then
+            echo "Tree is clean nothing to commit!"
+          else
+            git fetch origin
+            git config --local user.email "renz-bot-no-reply@gmail.com"
+            git config --local user.name "Renz Robot"
+            git branch --show-current
+            git pull origin $(git branch --show-current)
+            git restore bentofile.yaml
+            git add --all
+            git commit -m "Save deploy state of rsmn-sales-xgbr"
+            git push origin $(git branch --show-current)
+          fi
