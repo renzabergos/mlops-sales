@@ -1,5 +1,7 @@
 docker
+aws-cli
 bentoml
+bentoctl
 numpy
 pandas
 scikit-learn

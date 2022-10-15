@@ -22,7 +22,7 @@ class CustomRunnable(bentoml.Runnable):
 
 
 custom_runner = bentoml.Runner(CustomRunnable)
-svc = bentoml.Service("rsmn-sales-xgbr-1_0", runners=[custom_runner])
+svc = bentoml.Service("rsmn-sales-xgbr", runners=[custom_runner])
 
 
 # Custom Functions

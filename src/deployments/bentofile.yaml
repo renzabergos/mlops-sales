@@ -1,7 +1,7 @@
 service: "model_service:svc"
 labels:
   owner: renz
-  stage: develop
+  stage: NAMESPACE_VAL
 include:
   - "*.py"
   - "*.json"
@@ -14,4 +14,4 @@ python:
     - xgboost==0.90
 docker:
   env:
-    - NAMESPACE=develop
+    - NAMESPACE=NAMESPACE_VAL
