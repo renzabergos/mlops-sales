@@ -5,7 +5,6 @@ on:
       - features/**
       - hotfix/**
       - develop
-      - staging
       - main
 
 jobs:
@@ -14,16 +13,38 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Python Environment
+      - name: Setup Python environment
         uses: actions/setup-python@v2
         with:
           python-version: "3.9"
 
-      - name: Setup Pre-commit Hooks
+      - name: Setup Pre-commit hooks
         run: |
           pip install pre-commit
           pre-commit install
 
-      - name: Check Files
+      - name: Check files
         run: |
           pre-commit run --all-files
+
+  unit-test:
+    needs: [check-code]
+    if: |
+      github.ref == 'refs/heads/develop'
+      || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          pip install -r src/deployments/requirements.txt
+
+      - name: Unit test model
+        run: |
+          python src/deployments/unit-test.py

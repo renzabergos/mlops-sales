@@ -4,7 +4,7 @@ labels:
   stage: develop
 include:
   - "*.py"
-  - "*.json"
+  - "artifacts/*"
 python:
   packages:
     - numpy
