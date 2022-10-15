@@ -1,5 +1,5 @@
 docker
-aws-cli
+awscli
 bentoml
 bentoctl
 numpy
