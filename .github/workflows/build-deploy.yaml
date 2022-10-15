@@ -62,8 +62,9 @@ jobs:
 
       - name: Deploy to AWS Sagemaker
         run: |
+          cd src/deployments
           terraform init
-          terraform apply -var-file=src/deployments/bentoctl.tfvars -auto-approve
+          terraform apply -var-file=bentoctl.tfvars -auto-approve
 
   test:
     if: ${{ github.event.inputs.run_test_after == 'true' }}
