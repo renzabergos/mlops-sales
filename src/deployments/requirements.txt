@@ -1,0 +1,8 @@
+docker
+awscli
+bentoml
+bentoctl
+numpy
+pandas
+scikit-learn
+xgboost==0.90

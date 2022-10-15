@@ -1,0 +1,17 @@
+service: "model_service:svc"
+labels:
+  owner: renz
+  stage: NAMESPACE_VAL
+include:
+  - "*.py"
+  - "*.json"
+  - "artifacts/"
+python:
+  packages:
+    - numpy
+    - pandas
+    - scikit-learn
+    - xgboost==0.90
+docker:
+  env:
+    - NAMESPACE=NAMESPACE_VAL

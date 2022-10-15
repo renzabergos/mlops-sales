@@ -1,0 +1,64 @@
+name: ci
+on:
+  push:
+    branches:
+      - features/**
+      - hotfix/**
+      - develop
+      - main
+
+jobs:
+  check-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Setup Pre-commit hooks
+        run: |
+          pip install pre-commit
+          pre-commit install
+
+      - name: Check files
+        run: |
+          pre-commit run --all-files
+
+  unit-test:
+    needs: [check-code]
+    if: |
+      github.ref == 'refs/heads/develop'
+      || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          pip install -r src/deployments/requirements.txt
+
+      - name: Unit test model
+        run: |
+          cd src/deployments
+          python unit-test.py
+
+  trigger-build-deploy:
+    needs: [unit-test]
+    if: |
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke build-deploy workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build-deploy
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          inputs: '{ "env": "staging",  "run_test_after": "false", "test_kind": "integration"}'

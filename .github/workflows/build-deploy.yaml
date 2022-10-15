@@ -1,0 +1,75 @@
+name: build-deploy
+on:
+  workflow_dispatch:
+    inputs:
+      env_name:
+        description: "Environment name (staging or production)"
+        required: true
+        default: "staging"
+      run_test_after:
+        description: "Run test after? (true or false)"
+        required: false
+        default: "false"
+      test_kind:
+        description: "Kind of test (integration or load)"
+        required: false
+        default: "integration"
+
+jobs:
+  build-n-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.env_name }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Environment details
+        run: |
+          echo "Environment: ${{ github.event.inputs.env_name }}"
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Install model dependencies
+        run: |
+          pip install -r src/deployments/requirements.txt
+
+      - name: Install bentoctl AWS Sagemaker operator
+        run: |
+          bentoctl operator install aws-sagemaker
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Build model using BentoML v1.0+
+        run: |
+          sed -i -e "s/NAMESPACE_VAL/${{ github.event.inputs.env_name }}/g" src/deployments/bentofile.yaml
+          cat src/deployments/bentofile.yaml
+          bentoml build -f src/deployments/bentofile.yaml src/deployments
+
+      - name: Containerize model and push to AWS ECR
+        run: |
+          bentoctl build -b rsmn-sales-xgbr:latest -f src/deployments/deployment_config.yaml
+
+      - name: Deploy to AWS Sagemaker
+        run: |
+          terraform init
+          terraform apply -var-file=src/deployments/bentoctl.tfvars -auto-approve
+
+  test:
+    if: ${{ github.event.inputs.run_test_after == 'true' }}
+    needs: [build-n-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke test workflow
+        run: |
+          echo "DO TESTING HERE!"
