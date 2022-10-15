@@ -61,4 +61,4 @@ jobs:
         with:
           workflow: build-deploy
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          inputs: '{ "env": "staging",  "run_test_after": "false", "test_kind": "integration"}'
+          inputs: '{ "env_name": "staging",  "run_test_after": "false", "test_kind": "integration"}'
