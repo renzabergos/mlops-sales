@@ -75,6 +75,8 @@ jobs:
       - name: Apply formatting suggestions
         continue-on-error: true
         run: |
+          pip install pre-commit
+          pre-commit install
           pre-commit run --all-files
 
       - name: Commit and push terraform state
