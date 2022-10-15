@@ -26,6 +26,8 @@ jobs:
       name: ${{ github.event.inputs.env_name }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Environment details
         run: |
@@ -69,6 +71,21 @@ jobs:
         run: |
           terraform init
           terraform apply -var-file=bentoctl.tfvars -auto-approve
+
+      - name: Commit and push terraform state
+        run: |
+          if [ -z $(git status -s) ]; then
+            echo "Tree is clean nothing to commit!"
+          else
+            git fetch origin
+            git config --local user.email "renz-bot-no-reply@gmail.com"
+            git config --local user.name "Renz Robot"
+            git branch --show-current
+            git pull origin $(git branch --show-current)
+            git add --all
+            git commit -m "Save deploy state of rsmn-sales-xgbr"
+            git push origin $(git branch --show-current)
+          fi
 
   test:
     if: ${{ github.event.inputs.run_test_after == 'true' }}
