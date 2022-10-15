@@ -82,6 +82,7 @@ jobs:
             git config --local user.name "Renz Robot"
             git branch --show-current
             git pull origin $(git branch --show-current)
+            git restore bentofile.yaml
             git add --all
             git commit -m "Save deploy state of rsmn-sales-xgbr"
             git push origin $(git branch --show-current)
