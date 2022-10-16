@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Python Test Dependencies
         run: |
-          pip install -r src/tests/integration-tests/requirements.txt
+          pip install -r src/tests/integration-test/requirements.txt
 
       - name: Run Integration Test
         env:
@@ -33,7 +33,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          python src/tests/integration-tests/test.py
+          python src/tests/integration-test/test.py
 
   load-test:
     if: ${{ github.event.inputs.kind == 'load' }}
