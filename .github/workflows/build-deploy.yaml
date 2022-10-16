@@ -101,5 +101,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Invoke test workflow
-        run: |
-          echo "DO TESTING HERE!"
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: test
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          inputs: '{ "env_name": "${{ github.event.inputs.env_name }}",  "kind": "${{ github.event.inputs.test_kind }}"}'

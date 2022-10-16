@@ -1,0 +1,60 @@
+name: test
+on:
+  workflow_dispatch:
+    inputs:
+      env_name:
+        description: "Environment name (e.g. develop, staging, or production)"
+        required: true
+        default: "develop"
+      kind:
+        description: "Kind of test (e.g. integration, or load)"
+        required: true
+        default: "integration"
+
+jobs:
+  integration-test:
+    if: ${{ github.event.inputs.kind == 'integration' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install Python Test Dependencies
+        run: |
+          pip install -r src/tests/integration-tests/requirements.txt
+
+      - name: Run Integration Test
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          python src/tests/integration-tests/test.py
+
+  load-test:
+    if: ${{ github.event.inputs.kind == 'load' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install Python Test Dependencies
+        run: |
+          pip install -r src/tests/load-test/requirements.txt
+
+      - name: Run Locust Load Test
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          locust -f src/tests/load-test/locustfile.py \
+            --config src/tests/load-test/config.conf --print-stats
