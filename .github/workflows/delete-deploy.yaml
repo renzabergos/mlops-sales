@@ -1,37 +1,17 @@
-name: build-deploy
-on:
-  workflow_dispatch:
-    inputs:
-      env_name:
-        description: "Environment name (staging or production)"
-        required: true
-        default: "staging"
-      run_test_after:
-        description: "Run test after? (true or false)"
-        required: false
-        default: "false"
-      test_kind:
-        description: "Kind of test (integration or load)"
-        required: false
-        default: "integration"
+name: delete-deploy
+on: workflow_dispatch
 
 defaults:
   run:
     working-directory: src/deployments
 
 jobs:
-  build-n-deploy:
+  delete-deployment:
     runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.event.inputs.env_name }}
     steps:
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
-      - name: Environment details
-        run: |
-          echo "Environment: ${{ github.event.inputs.env_name }}"
 
       - name: Setup Python environment
         uses: actions/setup-python@v4
@@ -41,7 +21,7 @@ jobs:
       - name: Setup terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Install model dependencies
+      - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
@@ -56,21 +36,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build model using BentoML v1.0+
-        run: |
-          sed -i -e "s/NAMESPACE_VAL/${{ github.event.inputs.env_name }}/g" bentofile.yaml
-          cat bentofile.yaml
-          bentoml build -f bentofile.yaml .
-
-      - name: Containerize model and push to AWS ECR
-        run: |
-          bentoctl build -b rsmn-sales-xgbr:latest -f deployment_config.yaml
-          cat bentoctl.tfvars
-
-      - name: Deploy to AWS Sagemaker
+      - name: Delete deployment via terraform
         run: |
           terraform init
-          terraform apply -var-file=bentoctl.tfvars -auto-approve
+          terraform destroy -var-file=bentoctl.tfvars -auto-approve
 
       - name: Apply formatting suggestions
         continue-on-error: true
@@ -94,15 +63,3 @@ jobs:
             git commit -m "Save deploy state of rsmn-sales-xgbr"
             git push origin $(git branch --show-current)
           fi
-
-  test:
-    if: ${{ github.event.inputs.run_test_after == 'true' }}
-    needs: [build-n-deploy]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Invoke test workflow
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: test
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          inputs: '{ "env_name": "${{ github.event.inputs.env_name }}",  "kind": "${{ github.event.inputs.test_kind }}"}'
