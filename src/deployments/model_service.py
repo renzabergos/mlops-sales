@@ -13,7 +13,7 @@ class CustomRunnable(bentoml.Runnable):
     def __init__(self):
         # Load XGBoostRegression Model
         self.model = XGBRegressor()
-        self.model.load_model("./artifacts/xgbr-1_0.json")
+        self.model.load_model("./artifacts/xgbr-1_8.json")
 
     @bentoml.Runnable.method(batchable=False)
     def predict(self, input_df: pd.DataFrame) -> list:
