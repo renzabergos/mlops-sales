@@ -8,7 +8,7 @@ It can easily handle the ff:
 * Imbalanced datasets
 * Mixed feature types like categorical and continuous (e.g. gender, age, number of customers, etc.)
 * Not sensitive to scale - standardization/normalization is not necessary
-* Both training and inference is relatively fast relative to deel learning (DL) models
+* Both training and inference is relatively fast relative to deep learning (DL) models
 
 ## Data Preparation
 From the specifications, the following columns are the input data to the model (in production); hence, model was trained on those set of features/inputs to predict sales:
@@ -31,7 +31,7 @@ From the specifications, the following columns are the input data to the model (
     - from `['0', 'a', 'b', 'c']` to `[0, 1, 2, 3]`
 
 ## Model Training Experiments
-Summary of results of training the model with different hyperparameters can be seen at the end of the Jupyter notebook (`notebooks/`). So far, the best performing model with lowest RMSE, RMSPE, and does not overfit:
+Summary of results of training the model with different hyperparameters can be seen at the end of the Jupyter notebook (`notebooks/1_x_Rossmann_Sales_Model_Creation.ipynb`). So far, the best performing model with lowest RMSE, RMSPE, and does not overfit:
 
 Params:
 * `objective="reg:squarederror"`
@@ -62,7 +62,7 @@ From the chart, we can see that the model predictions depend on which store, the
 ## Model Deployment
 The best performing model was exported to an external `json` file. Model was then packaged into a REST API service. Upon initialization of the service, the model was loaded using the `XGBoost` library for production use. To handle incoming requests, inputs are preprocessed as desribed in the `Feature Engineering` section before it is fed into the model to output sales predictions.
 
-To know more, please see: `src/deployments/model_service.py`
+To know more, please see: [src/deployments/model_service.py]([src/deployments/model_service.py])
 
 ## Model Testing
 ### Unit Testing
