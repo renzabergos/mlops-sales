@@ -87,12 +87,12 @@ jobs:
             git fetch origin
             git config --local user.email "renz-bot-no-reply@gmail.com"
             git config --local user.name "Renz Robot"
-            git branch --show-current
-            git pull origin $(git branch --show-current)
+            git checkout main
+            git pull origin main
             git restore bentofile.yaml
             git add --all
             git commit -m "Save deploy state of rsmn-sales-xgbr"
-            git push origin $(git branch --show-current)
+            git push origin main
           fi
 
   test:
